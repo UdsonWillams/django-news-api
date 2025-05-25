@@ -1,0 +1,2993 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "NEWS API",
+        "version": "1.0.0",
+        "description": "API para gerenciamento de notícias, planos e assinaturas do JOTA"
+    },
+    "paths": {
+        "/api/v1/auth/change-password/": {
+            "post": {
+                "operationId": "v1_auth_change_password_create",
+                "description": "Altera a senha do usuário atualmente autenticado.",
+                "summary": "Alterar senha",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChangeRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChangeRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChangeRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": { "description": "Senha alterada com sucesso" },
+                    "400": { "description": "Senha atual incorreta" }
+                }
+            }
+        },
+        "/api/v1/auth/register/": {
+            "post": {
+                "operationId": "v1_auth_register_create",
+                "description": "Cria uma nova conta de usuário com o tipo 'leitor' por padrão.",
+                "summary": "Registrar novo usuário",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }, {}],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Register"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "400": { "description": "Dados inválidos" }
+                }
+            }
+        },
+        "/api/v1/auth/token/": {
+            "post": {
+                "operationId": "v1_auth_token_create",
+                "description": "Autentica o usuário e retorna um par de tokens de acesso (access) e atualização (refresh).",
+                "summary": "Obter token JWT",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomTokenObtainPairRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomTokenObtainPairRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomTokenObtainPairRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": { "description": "No response body" },
+                    "401": { "description": "Credenciais inválidas" }
+                }
+            }
+        },
+        "/api/v1/auth/token/refresh/": {
+            "post": {
+                "operationId": "v1_auth_token_refresh_create",
+                "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRefreshRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRefreshRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRefreshRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenRefresh"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/token/verify/": {
+            "post": {
+                "operationId": "v1_auth_token_verify_create",
+                "description": "Takes a token and indicates if it is valid.  This view provides no\ninformation about a token's fitness for a particular use.",
+                "tags": ["Authentication"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenVerifyRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenVerifyRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenVerifyRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": { "200": { "description": "No response body" } }
+            }
+        },
+        "/api/v1/news/articles/": {
+            "get": {
+                "operationId": "v1_news_articles_list",
+                "description": "Retorna uma lista paginada de notícias, filtrada de acordo com as permissões do usuário atual.",
+                "summary": "Listar notícias",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "category",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "energia",
+                                "poder",
+                                "saude",
+                                "trabalhista",
+                                "tributos"
+                            ]
+                        },
+                        "description": "* `poder` - Power\n* `tributos` - Tax\n* `saude` - Health\n* `energia` - Energy\n* `trabalhista` - Labor"
+                    },
+                    {
+                        "in": "query",
+                        "name": "is_pro_content",
+                        "schema": { "type": "boolean" }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "A search term.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["draft", "published"]
+                        },
+                        "description": "* `draft` - Draft\n* `published` - Published"
+                    }
+                ],
+                "tags": ["News"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedNewsListList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1_news_articles_create",
+                "description": "Cria uma nova notícia. Disponível apenas para administradores e editores.",
+                "summary": "Criar notícia",
+                "tags": ["News"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/News"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/news/articles/{id}/": {
+            "get": {
+                "operationId": "v1_news_articles_retrieve",
+                "description": "Retorna os detalhes de uma notícia específica se o usuário tiver permissão para acessá-la.",
+                "summary": "Obter notícia",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Notícia.",
+                        "required": true
+                    }
+                ],
+                "tags": ["News"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NewsDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1_news_articles_update",
+                "description": "Atualiza uma notícia existente. Administradores podem editar qualquer notícia, editores apenas suas próprias.",
+                "summary": "Atualizar notícia",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Notícia.",
+                        "required": true
+                    }
+                ],
+                "tags": ["News"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/News"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "v1_news_articles_partial_update",
+                "description": "Atualiza parcialmente uma notícia existente. Administradores podem editar qualquer notícia, editores apenas suas próprias.",
+                "summary": "Atualizar notícia parcialmente",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Notícia.",
+                        "required": true
+                    }
+                ],
+                "tags": ["News"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNewsRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNewsRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNewsRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/News"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1_news_articles_destroy",
+                "description": "Exclui uma notícia. Administradores podem excluir qualquer notícia, editores apenas suas próprias.",
+                "summary": "Excluir notícia",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Notícia.",
+                        "required": true
+                    }
+                ],
+                "tags": ["News"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": { "204": { "description": "No response body" } }
+            }
+        },
+        "/api/v1/news/articles/{id}/publish/": {
+            "post": {
+                "operationId": "v1_news_articles_publish_create",
+                "description": "Muda o status da notícia para publicado e define a data de publicação atual.",
+                "summary": "Publicar notícia",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Notícia.",
+                        "required": true
+                    }
+                ],
+                "tags": ["News"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/News"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "detail": "Você não tem permissão para publicar esta notícia."
+                                }
+                            }
+                        },
+                        "description": "Permissão negada"
+                    }
+                }
+            }
+        },
+        "/api/v1/news/comments/": {
+            "get": {
+                "operationId": "v1_news_comments_list",
+                "description": "Retorna uma lista paginada de comentários.",
+                "summary": "Listar comentários",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "author",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "is_approved",
+                        "schema": { "type": "boolean" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "news",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    }
+                ],
+                "tags": ["Comments"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedCommentList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1_news_comments_create",
+                "description": "Adiciona um novo comentário a uma notícia.",
+                "summary": "Criar comentário",
+                "tags": ["Comments"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/news/comments/{id}/": {
+            "get": {
+                "operationId": "v1_news_comments_retrieve",
+                "description": "Retorna os detalhes de um comentário específico.",
+                "summary": "Obter comentário",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Comment.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Comments"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1_news_comments_update",
+                "description": "Atualiza um comentário existente. Usuários só podem editar seus próprios comentários.",
+                "summary": "Atualizar comentário",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Comment.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Comments"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "v1_news_comments_partial_update",
+                "description": "Atualiza parcialmente um comentário existente. Usuários só podem editar seus próprios comentários.",
+                "summary": "Atualizar comentário parcialmente",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Comment.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Comments"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCommentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCommentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCommentRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Comment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1_news_comments_destroy",
+                "description": "Exclui um comentário. Usuários só podem excluir seus próprios comentários.",
+                "summary": "Excluir comentário",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Comment.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Comments"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": { "204": { "description": "No response body" } }
+            }
+        },
+        "/api/v1/news/comments/{id}/approve/": {
+            "post": {
+                "operationId": "v1_news_comments_approve_create",
+                "description": "Aprova um comentário pendente. Disponível apenas para administradores.",
+                "summary": "Aprovar comentário",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Comment.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Comments"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "description": "Comentário aprovado com sucesso"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": { "description": "Permissão negada" }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/plans/plans/": {
+            "get": {
+                "operationId": "v1_plans_plans_list",
+                "description": "Retorna uma lista de todos os planos de assinatura disponíveis.",
+                "summary": "Listar planos",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "is_active",
+                        "schema": { "type": "boolean" }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "plan_type",
+                        "schema": { "type": "string", "enum": ["info", "pro"] },
+                        "description": "* `info` - JOTA Info\n* `pro` - JOTA PRO"
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "A search term.",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "tags": ["Plans"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPlanList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1_plans_plans_create",
+                "description": "Cria um novo plano de assinatura. Disponível apenas para administradores.",
+                "summary": "Criar plano",
+                "tags": ["Plans"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanCreateUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanCreateUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanCreateUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanCreateUpdate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/plans/plans/{id}/": {
+            "get": {
+                "operationId": "v1_plans_plans_retrieve",
+                "description": "Retorna os detalhes de um plano de assinatura específico.",
+                "summary": "Obter plano",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Plan.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Plans"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Plan"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1_plans_plans_update",
+                "description": "Atualiza um plano existente. Disponível apenas para administradores.",
+                "summary": "Atualizar plano",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Plan.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Plans"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanCreateUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanCreateUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanCreateUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanCreateUpdate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "v1_plans_plans_partial_update",
+                "description": "Atualiza parcialmente um plano existente. Disponível apenas para administradores.",
+                "summary": "Atualizar plano parcialmente",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Plan.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Plans"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanCreateUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanCreateUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanCreateUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanCreateUpdate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1_plans_plans_destroy",
+                "description": "Exclui um plano. Disponível apenas para administradores.",
+                "summary": "Excluir plano",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Plan.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Plans"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": { "204": { "description": "No response body" } }
+            }
+        },
+        "/api/v1/plans/plans/{id}/subscriptions/": {
+            "get": {
+                "operationId": "v1_plans_plans_subscriptions_list",
+                "description": "Retorna todas as assinaturas associadas a um plano específico.",
+                "summary": "Obter assinaturas de um plano",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Plan.",
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "is_active",
+                        "schema": { "type": "boolean" }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "plan_type",
+                        "schema": { "type": "string", "enum": ["info", "pro"] },
+                        "description": "* `info` - JOTA Info\n* `pro` - JOTA PRO"
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "A search term.",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "tags": ["Plans"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedSubscriptionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/plans/subscriptions/": {
+            "get": {
+                "operationId": "v1_plans_subscriptions_list",
+                "description": "Retorna uma lista de assinaturas. Administradores veem todas, outros usuários apenas suas próprias.",
+                "summary": "Listar assinaturas",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "plan",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "cancelled",
+                                "expired",
+                                "pending"
+                            ]
+                        },
+                        "description": "* `active` - Active\n* `pending` - Pending\n* `cancelled` - Cancelled\n* `expired` - Expired"
+                    },
+                    {
+                        "in": "query",
+                        "name": "user",
+                        "schema": { "type": "integer" }
+                    }
+                ],
+                "tags": ["Subscriptions"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedSubscriptionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1_plans_subscriptions_create",
+                "description": "Cria uma nova assinatura. Disponível apenas para administradores.",
+                "summary": "Criar assinatura",
+                "tags": ["Subscriptions"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscriptionCreateUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscriptionCreateUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscriptionCreateUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubscriptionCreateUpdate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/plans/subscriptions/{id}/": {
+            "get": {
+                "operationId": "v1_plans_subscriptions_retrieve",
+                "description": "Retorna os detalhes de uma assinatura específica.",
+                "summary": "Obter assinatura",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Subscription.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Subscriptions"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subscription"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1_plans_subscriptions_update",
+                "description": "Atualiza uma assinatura existente. Disponível apenas para administradores.",
+                "summary": "Atualizar assinatura",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Subscription.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Subscriptions"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscriptionCreateUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscriptionCreateUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscriptionCreateUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubscriptionCreateUpdate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "v1_plans_subscriptions_partial_update",
+                "description": "Atualiza parcialmente uma assinatura existente. Disponível apenas para administradores.",
+                "summary": "Atualizar assinatura parcialmente",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Subscription.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Subscriptions"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSubscriptionCreateUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSubscriptionCreateUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSubscriptionCreateUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubscriptionCreateUpdate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1_plans_subscriptions_destroy",
+                "description": "Exclui uma assinatura. Disponível apenas para administradores.",
+                "summary": "Excluir assinatura",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Subscription.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Subscriptions"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": { "204": { "description": "No response body" } }
+            }
+        },
+        "/api/v1/plans/subscriptions/my_subscriptions/": {
+            "get": {
+                "operationId": "v1_plans_subscriptions_my_subscriptions_list",
+                "description": "Retorna as assinaturas do usuário atualmente autenticado.",
+                "summary": "Minhas assinaturas",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "plan",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "cancelled",
+                                "expired",
+                                "pending"
+                            ]
+                        },
+                        "description": "* `active` - Active\n* `pending` - Pending\n* `cancelled` - Cancelled\n* `expired` - Expired"
+                    },
+                    {
+                        "in": "query",
+                        "name": "user",
+                        "schema": { "type": "integer" }
+                    }
+                ],
+                "tags": ["Subscriptions"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedSubscriptionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/plans/verticals/": {
+            "get": {
+                "operationId": "v1_plans_verticals_list",
+                "description": "Retorna uma lista de todas as verticais de conteúdo disponíveis.",
+                "summary": "Listar verticais",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "A search term.",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "tags": ["Verticals"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedVerticalList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1_plans_verticals_create",
+                "description": "Cria uma nova vertical de conteúdo. Disponível apenas para administradores.",
+                "summary": "Criar vertical",
+                "tags": ["Verticals"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerticalRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerticalRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerticalRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vertical"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/plans/verticals/{id}/": {
+            "get": {
+                "operationId": "v1_plans_verticals_retrieve",
+                "description": "Retorna os detalhes de uma vertical específica.",
+                "summary": "Obter vertical",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Vertical.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Verticals"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vertical"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1_plans_verticals_update",
+                "description": "Atualiza uma vertical existente. Disponível apenas para administradores.",
+                "summary": "Atualizar vertical",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Vertical.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Verticals"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerticalRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerticalRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerticalRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vertical"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "v1_plans_verticals_partial_update",
+                "description": "Atualiza parcialmente uma vertical existente. Disponível apenas para administradores.",
+                "summary": "Atualizar vertical parcialmente",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Vertical.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Verticals"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedVerticalRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedVerticalRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedVerticalRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vertical"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1_plans_verticals_destroy",
+                "description": "Exclui uma vertical. Disponível apenas para administradores.",
+                "summary": "Excluir vertical",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this Vertical.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Verticals"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": { "204": { "description": "No response body" } }
+            }
+        },
+        "/api/v1/users/": {
+            "get": {
+                "operationId": "v1_users_list",
+                "description": "Retorna uma lista paginada de usuários. Disponível apenas para administradores.",
+                "summary": "Listar usuários",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "name": "search",
+                        "required": false,
+                        "in": "query",
+                        "description": "A search term.",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "tags": ["Users"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedUserList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1_users_create",
+                "description": "Cria um novo usuário. Disponível apenas para administradores.",
+                "summary": "Criar usuário",
+                "tags": ["Users"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserCreate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/users/{id}/": {
+            "get": {
+                "operationId": "v1_users_retrieve",
+                "description": "Retorna os detalhes de um usuário específico. Usuários podem ver apenas seus próprios dados, administradores podem ver qualquer usuário.",
+                "summary": "Obter usuário",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this user.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Users"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1_users_update",
+                "description": "Atualiza um usuário existente. Usuários podem atualizar apenas seus próprios dados, administradores podem atualizar qualquer usuário.",
+                "summary": "Atualizar usuário",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this user.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Users"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "v1_users_partial_update",
+                "description": "Atualiza parcialmente um usuário existente. Usuários podem atualizar apenas seus próprios dados, administradores podem atualizar qualquer usuário.",
+                "summary": "Atualizar usuário parcialmente",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this user.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Users"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUserRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUserRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUserRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1_users_destroy",
+                "description": "Exclui um usuário. Disponível apenas para administradores.",
+                "summary": "Excluir usuário",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": { "type": "integer" },
+                        "description": "A unique integer value identifying this user.",
+                        "required": true
+                    }
+                ],
+                "tags": ["Users"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": { "204": { "description": "No response body" } }
+            }
+        },
+        "/api/v1/users/me/": {
+            "get": {
+                "operationId": "v1_users_me_retrieve",
+                "description": "Retorna os dados do usuário atualmente autenticado.",
+                "summary": "Meu perfil",
+                "tags": ["Users"],
+                "security": [{ "jwtAuth": [] }],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CategoryEnum": {
+                "enum": [
+                    "poder",
+                    "tributos",
+                    "saude",
+                    "energia",
+                    "trabalhista"
+                ],
+                "type": "string",
+                "description": "* `poder` - Power\n* `tributos` - Tax\n* `saude` - Health\n* `energia` - Energy\n* `trabalhista` - Labor"
+            },
+            "Comment": {
+                "type": "object",
+                "description": "Serializer for comment model",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "news": { "type": "integer", "title": "News Article" },
+                    "author_id": { "type": "integer", "readOnly": true },
+                    "author_username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "readOnly": true
+                    },
+                    "content": { "type": "string", "title": "Comment" },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "is_approved": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "title": "Approved"
+                    }
+                },
+                "required": [
+                    "author_id",
+                    "author_username",
+                    "content",
+                    "created_at",
+                    "id",
+                    "is_approved",
+                    "news",
+                    "updated_at"
+                ]
+            },
+            "CommentRequest": {
+                "type": "object",
+                "description": "Serializer for comment model",
+                "properties": {
+                    "news": { "type": "integer", "title": "News Article" },
+                    "content": {
+                        "type": "string",
+                        "minLength": 1,
+                        "title": "Comment"
+                    }
+                },
+                "required": ["content", "news"]
+            },
+            "CustomTokenObtainPairRequest": {
+                "type": "object",
+                "description": "Custom token serializer that adds user info to the token",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    }
+                },
+                "required": ["password", "username"]
+            },
+            "News": {
+                "type": "object",
+                "description": "Serializer for News model with full fields",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "title": { "type": "string", "maxLength": 200 },
+                    "subtitle": { "type": "string", "maxLength": 300 },
+                    "image": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "content": { "type": "string" },
+                    "publication_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "category": { "$ref": "#/components/schemas/CategoryEnum" },
+                    "category_display": { "type": "string", "readOnly": true },
+                    "is_pro_content": {
+                        "type": "boolean",
+                        "title": "PRO Content",
+                        "description": "Check this option if content is exclusive for PRO clients."
+                    },
+                    "author": { "type": "integer", "readOnly": true },
+                    "author_username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "readOnly": true
+                    },
+                    "status": { "$ref": "#/components/schemas/Status68aEnum" },
+                    "status_display": { "type": "string", "readOnly": true },
+                    "is_published": { "type": "string", "readOnly": true },
+                    "comments_count": { "type": "string", "readOnly": true }
+                },
+                "required": [
+                    "author",
+                    "author_username",
+                    "category_display",
+                    "comments_count",
+                    "content",
+                    "created_at",
+                    "id",
+                    "is_published",
+                    "status_display",
+                    "title",
+                    "updated_at"
+                ]
+            },
+            "NewsDetail": {
+                "type": "object",
+                "description": "Extended serializer that includes approved comments",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "title": { "type": "string", "maxLength": 200 },
+                    "subtitle": { "type": "string", "maxLength": 300 },
+                    "image": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "content": { "type": "string" },
+                    "publication_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "category": { "$ref": "#/components/schemas/CategoryEnum" },
+                    "category_display": { "type": "string", "readOnly": true },
+                    "is_pro_content": {
+                        "type": "boolean",
+                        "title": "PRO Content",
+                        "description": "Check this option if content is exclusive for PRO clients."
+                    },
+                    "author": { "type": "integer", "readOnly": true },
+                    "author_username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "readOnly": true
+                    },
+                    "status": { "$ref": "#/components/schemas/Status68aEnum" },
+                    "status_display": { "type": "string", "readOnly": true },
+                    "is_published": { "type": "string", "readOnly": true },
+                    "comments_count": { "type": "string", "readOnly": true },
+                    "comments": { "type": "string", "readOnly": true }
+                },
+                "required": [
+                    "author",
+                    "author_username",
+                    "category_display",
+                    "comments",
+                    "comments_count",
+                    "content",
+                    "created_at",
+                    "id",
+                    "is_published",
+                    "status_display",
+                    "title",
+                    "updated_at"
+                ]
+            },
+            "NewsList": {
+                "type": "object",
+                "description": "Simplified serializer for listing news",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "title": { "type": "string", "maxLength": 200 },
+                    "subtitle": { "type": "string", "maxLength": 300 },
+                    "image": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "publication_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "category": { "$ref": "#/components/schemas/CategoryEnum" },
+                    "category_display": { "type": "string", "readOnly": true },
+                    "is_pro_content": {
+                        "type": "boolean",
+                        "title": "PRO Content",
+                        "description": "Check this option if content is exclusive for PRO clients."
+                    },
+                    "author_username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "readOnly": true
+                    },
+                    "is_published": { "type": "string", "readOnly": true }
+                },
+                "required": [
+                    "author_username",
+                    "category_display",
+                    "id",
+                    "is_published",
+                    "title"
+                ]
+            },
+            "NewsRequest": {
+                "type": "object",
+                "description": "Serializer for News model with full fields",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "subtitle": { "type": "string", "maxLength": 300 },
+                    "image": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    },
+                    "content": { "type": "string", "minLength": 1 },
+                    "publication_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "category": { "$ref": "#/components/schemas/CategoryEnum" },
+                    "is_pro_content": {
+                        "type": "boolean",
+                        "title": "PRO Content",
+                        "description": "Check this option if content is exclusive for PRO clients."
+                    },
+                    "status": { "$ref": "#/components/schemas/Status68aEnum" }
+                },
+                "required": ["content", "title"]
+            },
+            "PaginatedCommentList": {
+                "type": "object",
+                "required": ["count", "results"],
+                "properties": {
+                    "count": { "type": "integer", "example": 123 },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Comment" }
+                    }
+                }
+            },
+            "PaginatedNewsListList": {
+                "type": "object",
+                "required": ["count", "results"],
+                "properties": {
+                    "count": { "type": "integer", "example": 123 },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/NewsList" }
+                    }
+                }
+            },
+            "PaginatedPlanList": {
+                "type": "object",
+                "required": ["count", "results"],
+                "properties": {
+                    "count": { "type": "integer", "example": 123 },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Plan" }
+                    }
+                }
+            },
+            "PaginatedSubscriptionList": {
+                "type": "object",
+                "required": ["count", "results"],
+                "properties": {
+                    "count": { "type": "integer", "example": 123 },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Subscription" }
+                    }
+                }
+            },
+            "PaginatedUserList": {
+                "type": "object",
+                "required": ["count", "results"],
+                "properties": {
+                    "count": { "type": "integer", "example": 123 },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/User" }
+                    }
+                }
+            },
+            "PaginatedVerticalList": {
+                "type": "object",
+                "required": ["count", "results"],
+                "properties": {
+                    "count": { "type": "integer", "example": 123 },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Vertical" }
+                    }
+                }
+            },
+            "PasswordChangeRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "current_password": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Current user password"
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "New password to set"
+                    }
+                },
+                "required": ["current_password", "new_password"]
+            },
+            "PatchedCommentRequest": {
+                "type": "object",
+                "description": "Serializer for comment model",
+                "properties": {
+                    "news": { "type": "integer", "title": "News Article" },
+                    "content": {
+                        "type": "string",
+                        "minLength": 1,
+                        "title": "Comment"
+                    }
+                }
+            },
+            "PatchedNewsRequest": {
+                "type": "object",
+                "description": "Serializer for News model with full fields",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "subtitle": { "type": "string", "maxLength": 300 },
+                    "image": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    },
+                    "content": { "type": "string", "minLength": 1 },
+                    "publication_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "category": { "$ref": "#/components/schemas/CategoryEnum" },
+                    "is_pro_content": {
+                        "type": "boolean",
+                        "title": "PRO Content",
+                        "description": "Check this option if content is exclusive for PRO clients."
+                    },
+                    "status": { "$ref": "#/components/schemas/Status68aEnum" }
+                }
+            },
+            "PatchedPlanCreateUpdateRequest": {
+                "type": "object",
+                "description": "Serializer for creating and updating plans",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "title": "Plan Name",
+                        "maxLength": 100
+                    },
+                    "slug": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 50,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": { "type": "string" },
+                    "plan_type": {
+                        "$ref": "#/components/schemas/PlanTypeEnum"
+                    },
+                    "price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "description": "Monthly price in BRL"
+                    },
+                    "verticals": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                    },
+                    "is_active": { "type": "boolean", "title": "Active" }
+                }
+            },
+            "PatchedSubscriptionCreateUpdateRequest": {
+                "type": "object",
+                "description": "Serializer for creating and updating subscriptions",
+                "properties": {
+                    "user": { "type": "integer" },
+                    "plan": { "type": "integer" },
+                    "status": { "$ref": "#/components/schemas/Status0ddEnum" },
+                    "start_date": { "type": "string", "format": "date-time" },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                }
+            },
+            "PatchedUserRequest": {
+                "type": "object",
+                "description": "Serializer for user model",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 },
+                    "user_type": {
+                        "$ref": "#/components/schemas/UserTypeEnum"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+                    }
+                }
+            },
+            "PatchedVerticalRequest": {
+                "type": "object",
+                "description": "Serializer for Vertical model",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "slug": {
+                        "allOf": [{ "$ref": "#/components/schemas/SlugEnum" }],
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": { "type": "string" }
+                }
+            },
+            "Plan": {
+                "type": "object",
+                "description": "Serializer for Plan model",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "name": {
+                        "type": "string",
+                        "title": "Plan Name",
+                        "maxLength": 100
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": { "type": "string" },
+                    "plan_type": {
+                        "$ref": "#/components/schemas/PlanTypeEnum"
+                    },
+                    "plan_type_display": { "type": "string", "readOnly": true },
+                    "price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "description": "Monthly price in BRL"
+                    },
+                    "verticals": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Vertical" },
+                        "readOnly": true
+                    },
+                    "is_active": { "type": "boolean", "title": "Active" }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "plan_type_display",
+                    "price",
+                    "slug",
+                    "verticals"
+                ]
+            },
+            "PlanCreateUpdate": {
+                "type": "object",
+                "description": "Serializer for creating and updating plans",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "name": {
+                        "type": "string",
+                        "title": "Plan Name",
+                        "maxLength": 100
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": { "type": "string" },
+                    "plan_type": {
+                        "$ref": "#/components/schemas/PlanTypeEnum"
+                    },
+                    "price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "description": "Monthly price in BRL"
+                    },
+                    "verticals": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                    },
+                    "is_active": { "type": "boolean", "title": "Active" }
+                },
+                "required": ["id", "name", "price", "slug"]
+            },
+            "PlanCreateUpdateRequest": {
+                "type": "object",
+                "description": "Serializer for creating and updating plans",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "title": "Plan Name",
+                        "maxLength": 100
+                    },
+                    "slug": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 50,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": { "type": "string" },
+                    "plan_type": {
+                        "$ref": "#/components/schemas/PlanTypeEnum"
+                    },
+                    "price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "description": "Monthly price in BRL"
+                    },
+                    "verticals": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                    },
+                    "is_active": { "type": "boolean", "title": "Active" }
+                },
+                "required": ["name", "price", "slug"]
+            },
+            "PlanTypeEnum": {
+                "enum": ["info", "pro"],
+                "type": "string",
+                "description": "* `info` - JOTA Info\n* `pro` - JOTA PRO"
+            },
+            "Register": {
+                "type": "object",
+                "description": "Serializer for user registration",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 }
+                },
+                "required": ["email", "first_name", "last_name", "username"]
+            },
+            "RegisterRequest": {
+                "type": "object",
+                "description": "Serializer for user registration",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 8
+                    },
+                    "password_confirm": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 }
+                },
+                "required": [
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "password",
+                    "password_confirm",
+                    "username"
+                ]
+            },
+            "SlugEnum": {
+                "enum": [
+                    "poder",
+                    "tributos",
+                    "saude",
+                    "energia",
+                    "trabalhista"
+                ],
+                "type": "string",
+                "description": "* `poder` - Power\n* `tributos` - Tax\n* `saude` - Health\n* `energia` - Energy\n* `trabalhista` - Labor"
+            },
+            "Status0ddEnum": {
+                "enum": ["active", "pending", "cancelled", "expired"],
+                "type": "string",
+                "description": "* `active` - Active\n* `pending` - Pending\n* `cancelled` - Cancelled\n* `expired` - Expired"
+            },
+            "Status68aEnum": {
+                "enum": ["draft", "published"],
+                "type": "string",
+                "description": "* `draft` - Draft\n* `published` - Published"
+            },
+            "Subscription": {
+                "type": "object",
+                "description": "Serializer for Subscription model",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "user": { "type": "integer" },
+                    "user_username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "readOnly": true
+                    },
+                    "plan": {
+                        "allOf": [{ "$ref": "#/components/schemas/Plan" }],
+                        "readOnly": true
+                    },
+                    "status": { "$ref": "#/components/schemas/Status0ddEnum" },
+                    "status_display": { "type": "string", "readOnly": true },
+                    "start_date": { "type": "string", "format": "date-time" },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "is_active": { "type": "string", "readOnly": true }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "is_active",
+                    "plan",
+                    "start_date",
+                    "status_display",
+                    "updated_at",
+                    "user",
+                    "user_username"
+                ]
+            },
+            "SubscriptionCreateUpdate": {
+                "type": "object",
+                "description": "Serializer for creating and updating subscriptions",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "user": { "type": "integer" },
+                    "plan": { "type": "integer" },
+                    "status": { "$ref": "#/components/schemas/Status0ddEnum" },
+                    "start_date": { "type": "string", "format": "date-time" },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": ["id", "plan", "start_date", "user"]
+            },
+            "SubscriptionCreateUpdateRequest": {
+                "type": "object",
+                "description": "Serializer for creating and updating subscriptions",
+                "properties": {
+                    "user": { "type": "integer" },
+                    "plan": { "type": "integer" },
+                    "status": { "$ref": "#/components/schemas/Status0ddEnum" },
+                    "start_date": { "type": "string", "format": "date-time" },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": ["plan", "start_date", "user"]
+            },
+            "TokenRefresh": {
+                "type": "object",
+                "properties": {
+                    "access": { "type": "string", "readOnly": true }
+                },
+                "required": ["access"]
+            },
+            "TokenRefreshRequest": {
+                "type": "object",
+                "properties": {
+                    "refresh": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    }
+                },
+                "required": ["refresh"]
+            },
+            "TokenVerifyRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    }
+                },
+                "required": ["token"]
+            },
+            "User": {
+                "type": "object",
+                "description": "Serializer for user model",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 },
+                    "user_type": {
+                        "$ref": "#/components/schemas/UserTypeEnum"
+                    },
+                    "user_type_display": { "type": "string", "readOnly": true },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+                    },
+                    "date_joined": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "date_joined",
+                    "email",
+                    "id",
+                    "user_type_display",
+                    "username"
+                ]
+            },
+            "UserCreate": {
+                "type": "object",
+                "description": "Serializer for creating users",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 },
+                    "user_type": {
+                        "$ref": "#/components/schemas/UserTypeEnum"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+                    }
+                },
+                "required": ["email", "id", "username"]
+            },
+            "UserCreateRequest": {
+                "type": "object",
+                "description": "Serializer for creating users",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 },
+                    "user_type": {
+                        "$ref": "#/components/schemas/UserTypeEnum"
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+                    }
+                },
+                "required": ["email", "password", "username"]
+            },
+            "UserDetail": {
+                "type": "object",
+                "description": "Detailed user serializer with subscription information",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "username": {
+                        "type": "string",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 },
+                    "user_type": {
+                        "$ref": "#/components/schemas/UserTypeEnum"
+                    },
+                    "user_type_display": { "type": "string", "readOnly": true },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+                    },
+                    "date_joined": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "active_subscription": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "active_subscription",
+                    "date_joined",
+                    "email",
+                    "id",
+                    "user_type_display",
+                    "username"
+                ]
+            },
+            "UserRequest": {
+                "type": "object",
+                "description": "Serializer for user model",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "first_name": { "type": "string", "maxLength": 150 },
+                    "last_name": { "type": "string", "maxLength": 150 },
+                    "user_type": {
+                        "$ref": "#/components/schemas/UserTypeEnum"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
+                    }
+                },
+                "required": ["email", "username"]
+            },
+            "UserTypeEnum": {
+                "enum": ["admin", "editor", "reader"],
+                "type": "string",
+                "description": "* `admin` - Administrator\n* `editor` - Editor\n* `reader` - Reader"
+            },
+            "Vertical": {
+                "type": "object",
+                "description": "Serializer for Vertical model",
+                "properties": {
+                    "id": { "type": "integer", "readOnly": true },
+                    "name": { "type": "string", "maxLength": 100 },
+                    "slug": {
+                        "allOf": [{ "$ref": "#/components/schemas/SlugEnum" }],
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": { "type": "string" },
+                    "display_name": { "type": "string", "readOnly": true }
+                },
+                "required": ["display_name", "id", "name", "slug"]
+            },
+            "VerticalRequest": {
+                "type": "object",
+                "description": "Serializer for Vertical model",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "slug": {
+                        "allOf": [{ "$ref": "#/components/schemas/SlugEnum" }],
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": { "type": "string" }
+                },
+                "required": ["name", "slug"]
+            }
+        },
+        "securitySchemes": {
+            "jwtAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Autenticação e gerenciamento de usuários"
+        },
+        {
+            "name": "News",
+            "description": "Operações relacionadas a notícias e comentários"
+        },
+        {
+            "name": "Plans",
+            "description": "Gerenciamento de planos e assinaturas"
+        },
+        {
+            "name": "Subscriptions",
+            "description": "Gerenciamento de assinaturas e pagamentos"
+        },
+        {
+            "name": "Users",
+            "description": "Gerenciamento de usuários e permissões"
+        },
+        {
+            "name": "Verticals",
+            "description": "Gerenciamento de notícias verticais"
+        },
+        {
+            "name": "Comments",
+            "description": "Gerenciamento de comentários em notícias"
+        }
+    ]
+}
