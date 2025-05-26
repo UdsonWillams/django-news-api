@@ -147,4 +147,3 @@ pytest
 # Testes com relatório de cobertura
 make coverage
 ```
-
