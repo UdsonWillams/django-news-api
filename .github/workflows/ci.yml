@@ -55,9 +55,7 @@ jobs:
       - name: Run tests with SQLite
         run: |
           # Configurar SQLite para testes
-          export DJANGO_SETTINGS_MODULE=core.settings.test
-          export DATABASE_ENGINE=django.db.backends.sqlite3
-          export DATABASE_NAME=:memory:
+          export DJANGO_SETTINGS_MODULE=core.settings          
           export SECRET_KEY=testing-key
           export DB_DEBUG=True
           # Executar testes com coverage
