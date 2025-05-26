@@ -59,7 +59,7 @@ jobs:
           export DATABASE_ENGINE=django.db.backends.sqlite3
           export DATABASE_NAME=:memory:
           export SECRET_KEY=testing-key
-
+          export DB_DEBUG=True
           # Executar testes com coverage
           make coverage
 
@@ -67,7 +67,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
-          fail_ci_if_error: false
+          fail_ci_if_error: True
 
   security-check:
     name: Security Scan
