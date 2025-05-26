@@ -58,6 +58,7 @@ jobs:
           export DJANGO_SETTINGS_MODULE=core.settings.test
           export DATABASE_ENGINE=django.db.backends.sqlite3
           export DATABASE_NAME=:memory:
+          export SECRET_KEY=testing-key
 
           # Executar testes com coverage
           make coverage
