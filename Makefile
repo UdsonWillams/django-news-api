@@ -1,7 +1,7 @@
 .PHONY: runserver coverage test
 
 localserver:
-	export DB_DEBUG=1
+	export DB_DEBUG=True
 	python manage.py migrate
 	python manage.py runserver localhost:8000
 
