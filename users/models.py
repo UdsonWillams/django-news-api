@@ -97,6 +97,10 @@ class CustomUser(AbstractUser):
         if not subscription:
             return False
 
+        # Check if subscription is actually active and not expired
+        if not subscription.is_active:
+            return False
+
         # Check if the vertical is in the plan's verticals
         return subscription.plan.verticals.filter(slug=vertical_slug).exists()
 
