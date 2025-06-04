@@ -124,9 +124,9 @@ def openapi_to_postman(
                     "method": method.upper(),
                     "header": copy.deepcopy(default_headers),
                     "url": {
-                        "raw": f"{{{{base_url}}}}/{path.lstrip('/')}",
+                        "raw": f"{{{{base_url}}}}/{path.lstrip('/')}/",
                         "host": ["{{base_url}}"],
-                        "path": [p for p in path.strip("/").split("/") if p],
+                        "path": [p for p in path.strip("/").split("/") if p] + [""],
                     },
                 },
             }
