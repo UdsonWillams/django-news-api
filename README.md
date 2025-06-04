@@ -154,6 +154,8 @@ python manage.py test
 # Testes com pytest (recomendado)
 pytest
 
+
+
 # Testes com relatório de cobertura
 make coverage
 ```
