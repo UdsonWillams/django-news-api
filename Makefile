@@ -2,6 +2,7 @@
 
 localserver:
 	export DB_DEBUG=True
+	mkdir -p media
 	python manage.py migrate
 	python manage.py runserver localhost:8000
 

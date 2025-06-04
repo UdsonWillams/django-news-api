@@ -20,6 +20,9 @@ RUN apt-get update && apt-get install -y \
 # Copy all files
 COPY . .
 
+# Create necessary directories
+RUN mkdir -p /app/media
+
 # Copy entrypoint script
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

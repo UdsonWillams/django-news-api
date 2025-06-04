@@ -25,7 +25,7 @@ class SubscriptionInline(admin.TabularInline):
     fields = [
         "user",
         "plan",
-        "status",  # Corrigido de 'subscription_status' para 'status'
+        "status",
         "start_date",
         "end_date",
         "is_active",
@@ -39,7 +39,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = [
         "user",
         "plan",
-        "status",  # Corrigido de 'subscription_status' para 'status'
+        "status",
         "start_date",
         "end_date",
         "is_active",
@@ -49,12 +49,12 @@ class SubscriptionAdmin(admin.ModelAdmin):
         "status",
         "auto_renew",
         "plan",
-    ]  # Corrigido de 'subscription_status' para 'status'
+    ]
     search_fields = ["user__username", "user__email", "plan__name"]
     date_hierarchy = "start_date"
     autocomplete_fields = ["user", "plan"]
     fieldsets = [
-        (None, {"fields": ["user", "plan", "status"]}),  # Corrigido
+        (None, {"fields": ["user", "plan", "status"]}),
         (
             _("Date Information"),
             {"fields": ["start_date", "end_date"]},

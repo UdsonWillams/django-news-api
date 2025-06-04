@@ -33,6 +33,7 @@ Um sistema completo para gerenciamento de notícias, planos e assinaturas usando
 - Python 3.12 ou superior
 - Docker e Docker Compose (opcional, para contêineres)
 - PostgreSQL (para produção)
+- **libpq-dev** e **python3-dev** (para desenvolvimento local)
 
 ## 🔧 Configuração do Ambiente
 
@@ -43,7 +44,16 @@ git clone https://github.com/udsonwillams/django-news-api
 cd django-news-api
 ```
 
-### 2. Ambiente Virtual (para desenvolvimento local)
+### 2. Instalar dependências do sistema (para desenvolvimento local)
+
+Certifique-se de instalar as dependências necessárias para o ambiente local:
+
+```bash
+sudo apt update
+sudo apt install libpq-dev python3-dev
+```
+
+### 3. Ambiente Virtual (para desenvolvimento local)
 
 ```bash
 # Criar ambiente virtual
@@ -59,7 +69,7 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Configuração do arquivo .env
+### 4. Configuração do arquivo .env
 
 **⚠️ IMPORTANTE**: O sistema depende de variáveis de ambiente para funcionar corretamente.
 
@@ -147,5 +157,3 @@ pytest
 # Testes com relatório de cobertura
 make coverage
 ```
-
-

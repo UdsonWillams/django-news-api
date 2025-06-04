@@ -28,11 +28,6 @@ from rest_framework.renderers import JSONRenderer
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Incluir URLs de cada app
-    path("", include("news.urls")),
-    path("", include("users.urls")),
-    path("", include("plans.urls")),
-    path("", include("authentication.urls")),
     # API Schema documentation - modificado para retornar JSON por padrão
     path(
         "api/schema/json",
@@ -45,8 +40,13 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("api/auth/", include("authentication.urls")),
+    path("api/news/", include("news.urls")),
+    path("api/plans/", include("plans.urls")),
+    path("api/users/", include("users.urls")),
 ]
 
 # Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
